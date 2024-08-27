@@ -88,9 +88,9 @@ const filteredTasks = computed(() => {
         <button class="ad" @click="addTask">新增</button>
     </div>
     <div class="button-group">
-        <button @click="filterStatus = 'all'">全部(all)</button>
-        <button @click="filterStatus = '已完成'">已完成 (Completed)</button>
-        <button @click="filterStatus = '未完成'">未完成(Not completed)</button>
+        <button @click="filterStatus = 'all'" :class="{ active: filterStatus === 'all' }" >全部(all)</button>
+        <button @click="filterStatus = '已完成'" :class="{ active: filterStatus === '已完成' }" >已完成 (Completed)</button>
+        <button @click="filterStatus = '未完成'" :class="{ active: filterStatus === '未完成' }" >未完成(Not completed)</button>
     </div>
     <div class="input-group">
         <div>
@@ -109,23 +109,7 @@ const filteredTasks = computed(() => {
                 
             </li>
         </div>
-        <!-- <ul>
-                <li v-for="task in filteredTasks" :key="task.id" >
-                    <input class="checkbox" type="checkbox" v-model="task.status" @change="saveTasks" :true-value="'已完成'" :false-value="'未完成'">
-                    <p>
-                        <span>代辦事項ID:</span>
-                        <label>{{ task.createid }}</label>
-                    </p>
-                    <p>
-                        <span>代辦事項:</span>
-                        <label>{{ task.text }}</label>
-                    </p>
-                    <p>
-                    <span>狀態:</span>
-                        <label>{{ task.status }}</label>
-                    </p>
-                </li>
-        </ul> -->
+
     </div>
 
 </template>
@@ -153,6 +137,9 @@ const filteredTasks = computed(() => {
 .button-group button{
     margin: 5% 2%;
     font-size: 20px;
+}
+.button-group button.active {
+    background-color: #d4dbd4;
 }
 .input-group p span{
     margin: 0 4%;
@@ -182,7 +169,7 @@ const filteredTasks = computed(() => {
 @media screen and (min-width: 768px) {
 .text{
     margin: 0 10%;
-    font-size: 30px;
+    font-size: 40px;
 }
 .ad{
   font-size: 40px;
@@ -194,21 +181,18 @@ const filteredTasks = computed(() => {
     margin: 5% auto;
     font-size: 25px;
 }
-.input-group ul{
-    display: flex;
-    flex-wrap: wrap; /* 允许任务项换行 */
-    
-}
-.input-group li{
-    margin: 5% auto;
-}
-.input-group span{
+.input-group p span{
     font-size: 40px;
-
+    margin: 0 5%;
 }
-.input-group label{
-    width: 50%;
-    font-size: 30px;
+.input-group  .detail span{
+    font-size: 40px;
+    margin: 0 auto;
+}
+}@media screen and (min-width: 1024px) {
+    .input-group p span{
+    font-size: 40px;
+    margin: 0 8%;
 }
 }
 </style>
