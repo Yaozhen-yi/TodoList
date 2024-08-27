@@ -91,24 +91,6 @@ app.post('/api/login', (req, res) => {
 });
 
 //處理代辦事項
-// app.post('/api/create', (req, res) => {
-//     const { text, user_id } = req.body;
-//     console.log('代辦事項:',req.body);
-//     //檢查用戶是否存在
-//     if (!user_id) {
-//         return res.status(400).json({ success: false, message: '用户ID缺失' });
-//     }
-
-//     const sql = 'INSERT INTO tasks (text, user_id) VALUES (?, ?)';
-    
-//     db.query(sql, [text, user_id], (err, result) => {
-//         if (err) {
-//             console.error('添加任務錯誤:', err);
-//             return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
-//         }
-//         res.json({ success: true, message: '任務已添加', createid: result.insertId});
-//     });
-// });
 
 app.post('/api/create', (req, res) => {
     const { text, user_id } = req.body;
