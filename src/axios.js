@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 });
 
 
-// 你也可以在這裡設置 Axios 攔截器
+// 在這裡設置 Axios 攔截器
 axiosInstance.interceptors.request.use(
     config => {
         // 在請求發送之前可以添加 token 或其他 headers
@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
     error => {
         // 處理響應錯誤
         if (error.response && error.response.status === 401) {
-            // 未經授權，重定向到登入頁面或顯示提示
+            // 未經授權，重新導向到登入頁面或顯示提示
         }
         return Promise.reject(error);
     }

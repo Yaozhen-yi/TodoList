@@ -11,7 +11,7 @@ const filterStatus = ref('all');
 // 跳轉路由
 const router = useRouter();
 
-// 加载用户的任务数据
+// 加載用戶的任務數據
 const loadTasks = () => {
     const storedTasks = JSON.parse(localStorage.getItem(`tasks_${authStore.userId}`)) || [];
     tasks.value = storedTasks;
@@ -34,7 +34,7 @@ const addTask =  async () => {
     }
 
     if (!authStore.isLoggedIn) {
-        alert('请先登录');
+        alert('請先登入');
         return;
     }
 
@@ -42,10 +42,10 @@ const addTask =  async () => {
         
         const response = await axiosInstance.post('/create', {
             text: newTask.value,
-            user_id: authStore.userId // 确保这里传递了 user_id
+            user_id: authStore.userId // 确保這裡傳遞了 user_id
         });
 
-        console.log('响应数据:', response.data); // 打印响应数据
+        console.log('响应数据:', response.data); // 印出響應數據
 
 
         if (response.data.success) {
@@ -57,10 +57,10 @@ const addTask =  async () => {
 
             tasks.value.push(newTaskObj);
             newTask.value = '';
-            saveTasks(); // 保存到 localStorage
+            saveTasks(); // 保存到locakstrage
             alert('新增成功');
     } else {
-        throw new Error('响应数据格式不正确');
+        throw new Error('響應數據格式不正確');
     }
 } catch (error) {
     console.error('新增失敗:', error);
@@ -72,7 +72,7 @@ const saveTasks = () => {
     localStorage.setItem(`tasks_${authStore.userId}`, JSON.stringify(tasks.value));
 };
 
-// 筛选任务
+// 篩選任務狀態
 const filteredTasks = computed(() => {
     if (filterStatus.value === 'all') {
         return tasks.value;

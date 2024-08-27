@@ -45,13 +45,12 @@ const onLogin = async () => {
 
         if (response.data.success) {
             authStore.login(response.data.userName, response.data.userId);
-            // authStore.login(name.value);
             router.push('/todoview'); //跳轉到登錄驗面
         } else {
-            alert('登錄失敗，請檢查用戶姓名、密碼、email是否正確。');
+            alert('登入失敗，請檢查用戶姓名、密碼、email是否正確。');
         }
     } catch (error) {
-        alert('登錄過程出現錯誤，請重試。');
+        alert('登入過程出現錯誤，請重試。');
     }
 };
 </script>

@@ -30,7 +30,7 @@ const $v = useVuelidate(rules, { name ,password, email });
 const router = useRouter();
 
 const onRegister = async () => {
-    $v.value.$touch(); // 触发验证
+    $v.value.$touch(); // 觸發驗證
     if ($v.value.$invalid) return;
 
     try {
@@ -41,15 +41,15 @@ const onRegister = async () => {
         });
 
         if (response.data.success) {
-            console.log('id:', response.data.userId); // 打印用户 ID
-            alert('注册成功！');
-            isAuthenticated.value = true; // 禁用注册按钮
-            router.push('/login'); // 跳转到登录页面
+            console.log('id:', response.data.userId); // 印出用戶id
+            alert('註冊成功！');
+            isAuthenticated.value = true; // 禁用註冊按鈕
+            router.push('/login'); // 跳轉到登入頁面
         } else {
-            alert('注册失败，请重试。');
+            alert('註冊失敗，請重試。');
         }
     } catch (error) {
-        alert('注册过程中出现错误，请重试。');
+        alert('註冊過程出現錯誤，請重試。');
     }
 };
 </script>
@@ -59,21 +59,21 @@ const onRegister = async () => {
         <form id="dataForm" @submit.prevent="onRegister" method="post">
             <label for="name">姓名(Name):</label>
             <input id="name" v-model="name" type="text" placeholder="請輸入姓名">
-            <!-- 如果验证错误, 显示错误消息 -->
+            <!-- 如果驗證錯誤，顯示錯誤訊息 -->
             <span v-show="$v.name.$error">
                 <span v-for="(error, index) in $v.name.$errors" :key="index">{{ error.$message }}</span>
             </span>
 
             <label for="password">密碼(Password):</label>
             <input type="password" id="password" name="password" v-model="password" placeholder="請輸入密碼">
-            <!-- 如果验证错误, 显示错误消息 -->
+             <!-- 如果驗證錯誤，顯示錯誤訊息 -->
             <span v-show="$v.password.$error">
                 <span v-for="(error, index) in $v.password.$errors" :key="index">{{ error.$message }}</span>
             </span>
 
             <label for="email">E-mail:</label>
             <input id="email" v-model="email" type="email" placeholder="請輸入email">
-            <!-- 如果验证错误, 显示错误消息 -->
+             <!-- 如果驗證錯誤，顯示錯誤訊息 -->
             <span v-show="$v.email.$error">
                 <span v-for="(error, index) in $v.email.$errors" :key="index">{{ error.$message }}</span>
             </span>
