@@ -7,17 +7,17 @@ import bcrypt from 'bcrypt';
 import path from 'path'; 
 
 const app = express();
-const port = 3000;
+const port = process.env.VUE_APP_API_BASE_URL ||3000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // 數據庫連接
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '910221',
-    database: 'users'
+    host: process.env.host,
+    user: process.env.user,
+    password: process.env.password,
+    database: process.env.database
 });
 
 // 设置静态文件夹
