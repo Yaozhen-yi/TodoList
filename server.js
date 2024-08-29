@@ -123,6 +123,26 @@ app.post('/api/create', (req, res) => {
     });
 });
 
+// 獲取用戶所有任務
+app.post('/api/tasks', (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        return res.status(400).json({ success: false, message: '用户ID缺失' });
+    }
+
+    const sql = 'SELECT createid, text, status FROM tasks WHERE user_id = ?';
+    
+    db.query(sql, [user_id], (err, results) => {
+        if (err) {
+            console.error('獲取任務列表錯誤:', err);
+            return res.status(500).send({ success: false, message: '獲取任務列表出錯' });
+        }
+
+        res.json({ success: true, tasks: results });
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

@@ -11,20 +11,33 @@ const filterStatus = ref('all');
 // 跳轉路由
 const router = useRouter();
 
-// 加載用戶的任務數據
-const loadTasks = () => {
-    const storedTasks = JSON.parse(localStorage.getItem(`tasks_${authStore.userId}`)) || [];
-    tasks.value = storedTasks;
-};
-
 onMounted(async () => {
   if (!authStore.isLoggedIn) {
     router.push('/login');
   }  else {
-    loadTasks();
+    await loadTasks();
   }
 
 });
+
+// 加載用戶的任務數據
+const loadTasks = async () => {
+    try {
+        const response = await axiosInstance.post('/tasks', {
+            user_id: authStore.userId
+        });
+
+        if (response.data.success) {
+            tasks.value = response.data.tasks;
+        } else {
+            alert('加載任務失敗');
+        }
+    } catch (error) {
+        console.error('加載任務失敗:', error);
+        alert('加載任務失敗');
+    }
+};
+
 
 
 const addTask =  async () => {
@@ -39,37 +52,22 @@ const addTask =  async () => {
     }
 
     try {
-        
-        const response = await axiosInstance.post('/create', {
-            text: newTask.value,
-            user_id: authStore.userId // 确保這裡傳遞了 user_id
-        });
+    const response = await axiosInstance.post('/create', {
+      text: newTask.value,
+      user_id: authStore.userId
+    });
 
-        console.log('响应数据:', response.data); // 印出響應數據
-
-
-        if (response.data.success) {
-            const newTaskObj = {
-                createid: response.data.createid,
-                text: newTask.value,
-                status: '未完成'
-            };
-
-            tasks.value.push(newTaskObj);
-            newTask.value = '';
-            saveTasks(); // 保存到locakstrage
-            alert('新增成功');
+    if (response.data.success) {
+      await loadTasks(); // 重新加载任务
+      newTask.value = '';
+      alert('新增成功');
     } else {
-        throw new Error('響應數據格式不正確');
+      throw new Error('響應數據格式不正確');
     }
-} catch (error) {
+  } catch (error) {
     console.error('新增失敗:', error);
     alert('新增失敗');
   }
-};
-
-const saveTasks = () => {
-    localStorage.setItem(`tasks_${authStore.userId}`, JSON.stringify(tasks.value));
 };
 
 // 篩選任務狀態
@@ -89,8 +87,8 @@ const filteredTasks = computed(() => {
     </div>
     <div class="button-group">
         <button @click="filterStatus = 'all'" :class="{ active: filterStatus === 'all' }" >全部(all)</button>
-        <button @click="filterStatus = '已完成'" :class="{ active: filterStatus === '已完成' }" >已完成 (Completed)</button>
-        <button @click="filterStatus = '未完成'" :class="{ active: filterStatus === '未完成' }" >未完成(Not completed)</button>
+        <button @click="filterStatus = '已完成'" :class="{ active: filterStatus === 'true' }" >已完成 (Completed)</button>
+        <button @click="filterStatus = '未完成'" :class="{ active: filterStatus === 'false' }" >未完成(Not completed)</button>
     </div>
     <div class="input-group">
         <div>
