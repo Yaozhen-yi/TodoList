@@ -4,8 +4,8 @@ const axiosInstance = axios.create({
     baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api', // 後端api的基礎url
     timeout: 10000, // 請求超過時間
     headers: {
-        'Content-Type': 'application/javascript'
-    }
+        'Content-Type': 'application/json'
+    }    
 });
 
 
