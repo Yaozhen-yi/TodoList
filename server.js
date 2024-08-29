@@ -4,6 +4,7 @@ import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
+import path from 'path'; 
 
 const app = express();
 const port = 3000;
@@ -17,6 +18,15 @@ const db = mysql.createPool({
     user: 'root',
     password: '910221',
     database: 'users'
+});
+
+// 设置静态文件夹
+const __dirname = path.resolve(); // 获取当前目录
+app.use(express.static(path.join(__dirname, 'dist'))); // 提供 dist 目录下的静态文件
+
+// 所有未匹配的路由都返回 index.html（支持 SPA 路由）
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // 處理用戶註冊請求

@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  base: '/todoList', // 根据部署路径进行调整
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
