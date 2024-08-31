@@ -16,9 +16,9 @@ app.use(
     helmet.contentSecurityPolicy({
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "https://example.com"], // 允许从 example.com 加载脚本
-            styleSrc: ["'self'", "https://example.com"], // 允许从 example.com 加载样式表
-            imgSrc: ["'self'", "data:", "https://example.com"], // 允许从 example.com 加载图片
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com"], // 允许内联脚本和来自 gstatic 的脚本
+            styleSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com"], // 允许内联样式和来自 gstatic 的样式表
+            imgSrc: ["'self'", "data:", "https://www.gstatic.com"], // 允许来自 gstatic 的图片
             connectSrc: ["'self'"],
             fontSrc: ["'self'"],
             objectSrc: ["'none'"],
@@ -31,7 +31,7 @@ app.use(
 // 允许来自特定来源的请求
 const allowedOrigins = [
     'http://localhost:5173',       // 开发环境
-    'https://yaozhen-yi.github.io' // 生产环境
+    'https://todolist-s1pw.onrender.com' // 生产环境
   ];
   
   app.use(cors({
