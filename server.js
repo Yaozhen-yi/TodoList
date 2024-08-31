@@ -6,16 +6,31 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: '.env.development' });
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 
-
-app.use(cors({
-    origin: 'https://yaozhen-yi.github.io', // 允许的前端 URL
+// 允许来自特定来源的请求
+const allowedOrigins = [
+    'http://localhost:5173',       // 开发环境
+    'https://yaozhen-yi.github.io' // 生产环境
+  ];
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
   }));
+  app.use(express.json());
+
 app.use(bodyParser.json());
 
 // 數據庫連接
@@ -42,19 +57,32 @@ app.post('/api/register', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-         // 獲取當下時間
+
+        // 获取当前时间
         const currentTime = new Date();
-       // 插入註冊的用戶數據,包括註冊時間
-    const sql = 'INSERT INTO user (name, password, email, logintime) VALUES (?, ?, ?, ?)';
-        db.query(sql, [name, hashedPassword, email, currentTime], (err, result) => {
-            if (err) {
-                console.error('Error inserting data:', err);
-                return res.status(500).json({ success: false, message: '服務器錯誤' });
-            }
-            res.json({ success: true });
-            //返回生成的用户 ID
-        res.json({ success: true, userId: result.insertId });
-        });
+
+        // 插入注册的用户数据，包括注册时间
+        const sql = 'INSERT INTO user (name, password, email, logintime) VALUES (?, ?, ?, ?)';
+
+        // 使用 Promise 封装 db.query，以便使用 await
+        const query = (sql, params) => {
+            return new Promise((resolve, reject) => {
+                db.query(sql, params, (err, result) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(result);
+                    }
+                });
+            });
+        };
+        try {
+            const result = await query(sql, [name, hashedPassword, email, currentTime]);
+            res.json({ success: true, userId: result.insertId });
+        } catch (error) {
+            console.error('Error inserting data:', error);
+            res.status(500).json({ success: false, message: '服務器錯誤' });
+        }
     } catch (error) {
         console.error('Error hashing password:', error);
         res.status(500).json({ success: false, message: '服務器錯誤' });
