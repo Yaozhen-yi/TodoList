@@ -4,31 +4,34 @@ import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
-import path from 'path'; 
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // 數據庫連接
-const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '910221',
-    database: 'users'
-});
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+  });
 
-// 设置静态文件夹
-const __dirname = path.resolve(); // 获取当前目录
-app.use(express.static(path.join(__dirname, 'dist'))); // 提供 dist 目录下的静态文件
 
-// 所有未匹配的路由都返回 index.html（支持 SPA 路由）
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+db.connect((err) => {
+    if (err) {
+      console.error('Database connection error:', err);
+      return;
+    }
+    console.log('Connected to the database');
+  });
 
 // 處理用戶註冊請求
 app.post('/api/register', async (req, res) => {
@@ -39,8 +42,8 @@ app.post('/api/register', async (req, res) => {
          // 獲取當下時間
         const currentTime = new Date();
        // 插入註冊的用戶數據,包括註冊時間
-    const sql = 'INSERT INTO users (name, email, password,logintime) VALUES (?, ?, ?, ?)';
-        db.query(sql, [name, email, hashedPassword,currentTime], (err, result) => {
+    const sql = 'INSERT INTO user (name, password, email, logintime) VALUES (?, ?, ?, ?)';
+        db.query(sql, [name, hashedPassword, email, currentTime], (err, result) => {
             if (err) {
                 console.error('Error inserting data:', err);
                 return res.status(500).json({ success: false, message: '服務器錯誤' });
@@ -59,7 +62,7 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', (req, res) => {
     const { name, email, password } = req.body;
 
-    const query = 'SELECT * FROM users WHERE name = ? AND email = ?';
+    const query = 'SELECT * FROM user WHERE name = ? AND email = ?';
     db.query(query, [name, email], async (err, results) => {
         if (err) {
             console.error('Error querying database:', err);
@@ -71,7 +74,7 @@ app.post('/api/login', (req, res) => {
                 const isMatch = await bcrypt.compare(password, user.password);
                 if (isMatch) {
                     // 更新用戶時間
-                    const updateQuery = 'UPDATE users SET logintime = ? WHERE id = ?';
+                    const updateQuery = 'UPDATE user SET logintime = ? WHERE id = ?';
                     const currentTime = new Date(); // 當前時間
                     db.query(updateQuery, [currentTime, user.id], (updateErr) => {
                         if (updateErr) {
