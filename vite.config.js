@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig, loadEnv  } from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       vue(),
     ],
     // 根据当前环境设置 base 路径
-    base: mode === 'production' ? '/todoList' : '/',
+    base: mode === 'production' ? '/todoList/' : '/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
