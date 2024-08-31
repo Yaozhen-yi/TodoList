@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 import path from 'path'; 
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 
 app.use(cors());
@@ -15,10 +15,10 @@ app.use(bodyParser.json());
 
 // 數據庫連接
 const db = mysql.createPool({
-    host: process.env.host,
-    user: process.env.user,
-    password: process.env.password,
-    database: process.env.database
+    host: 'localhost',
+    user: 'root',
+    password: '910221',
+    database: 'users'
 });
 
 // 设置静态文件夹
