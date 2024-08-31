@@ -12,7 +12,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 
-app.use(cors());
+
+app.use(cors({
+    origin: 'https://yaozhen-yi.github.io', // 允许的前端 URL
+  }));
 app.use(bodyParser.json());
 
 // 數據庫連接
