@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
       vue(),
     ],
     // 根据当前环境设置 base 路径
-    base: mode === 'production' ? '/todoList/' : '/',
+    // base: mode === 'production' ? '/todoList/' : '/',
+    base: '/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
