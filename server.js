@@ -16,16 +16,17 @@ app.use(
     helmet.contentSecurityPolicy({
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"], // 允许内联脚本
-            styleSrc: ["'self'", "https://www.gstatic.com"], // 允许外部样式表
-            imgSrc: ["'self'", "data:"],
+            scriptSrc: ["'self'", "https://example.com"], // 允许从 example.com 加载脚本
+            styleSrc: ["'self'", "https://example.com"], // 允许从 example.com 加载样式表
+            imgSrc: ["'self'", "data:", "https://example.com"], // 允许从 example.com 加载图片
             connectSrc: ["'self'"],
             fontSrc: ["'self'"],
             objectSrc: ["'none'"],
             frameSrc: ["'none'"],
-          },
+        },
     })
-  );
+);
+
 
 // 允许来自特定来源的请求
 const allowedOrigins = [
