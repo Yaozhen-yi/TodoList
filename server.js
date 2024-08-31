@@ -10,6 +10,8 @@ import helmet from 'helmet';
 dotenv.config({ path: '.env.development' });
 
 const app = express();
+app.use(express.static('public'));
+
 const port = process.env.PORT || 3000;
 
 app.use(
