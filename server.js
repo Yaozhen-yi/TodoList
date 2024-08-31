@@ -5,12 +5,27 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 
 dotenv.config({ path: '.env.development' });
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"], // 允许内联脚本
+            styleSrc: ["'self'", "https://www.gstatic.com"], // 允许外部样式表
+            imgSrc: ["'self'", "data:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            frameSrc: ["'none'"],
+          },
+    })
+  );
 
 // 允许来自特定来源的请求
 const allowedOrigins = [
