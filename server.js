@@ -7,11 +7,9 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config({ path: '.env.production' });
 
 const app = express();
-app.use(express.static('public'));
-
 const port = process.env.PORT || 3000;
 
 app.use(
@@ -47,8 +45,9 @@ const allowedOrigins = [
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
   }));
-  app.use(express.json());
 
+  app.use(express.json());
+  app.use(express.static('dist'));
 app.use(bodyParser.json());
 
 // 數據庫連接
@@ -163,28 +162,32 @@ app.post('/api/create', (req, res) => {
         return res.status(400).json({ success: false, message: '用户ID缺失' });
     }
 
-    const sql = 'INSERT INTO tasks (text, user_id) VALUES (?, ?)';
+    // 查询当前用户的最大 createid
+    const maxCreateIdSql = 'SELECT COALESCE(MAX(createid), 0) AS max_createid FROM tasks WHERE user_id = ?';
     
-    db.query(sql, [text, user_id], (err, result) => {
-        if (err) {
-            console.error('添加任務錯誤:', err);
-            return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
+    db.query(maxCreateIdSql, [user_id], (maxCreateIdErr, maxCreateIdResult) => {
+        if (maxCreateIdErr) {
+            console.error('查询最大 createid 错误:', maxCreateIdErr);
+            return res.status(500).send({ success: false, message: '查询最大 createid 错误' });
         }
 
-        // 查询刚插入的数据以获得 createid
-        const selectSql = 'SELECT createid FROM tasks WHERE user_id = ? AND text = ? ORDER BY createid DESC LIMIT 1';
-        db.query(selectSql, [user_id, text], (selectErr, selectResult) => {
-            if (selectErr) {
-                console.error('查询 createid 错误:', selectErr);
-                return res.status(500).send({ success: false, message: '查询 createid 错误' });
+        const maxCreateid = maxCreateIdResult[0].max_createid;
+        const newCreateid = maxCreateid + 1;
+        console.log('新的 createid:', newCreateid); // 打印新的 createid
+
+        // 插入新任务
+        const insertSql = 'INSERT INTO tasks (createid, text, user_id) VALUES (?, ?, ?)';
+        db.query(insertSql, [newCreateid, text, user_id], (insertErr, insertResult) => {
+            if (insertErr) {
+                console.error('添加任務錯誤:', insertErr);
+                return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
             }
 
-            const createid = selectResult[0] ? selectResult[0].createid : null;
-            console.log('返回的 createid:', createid); // 打印返回的 createid
-            res.json({ success: true, message: '任務已添加', createid });
+            res.json({ success: true, message: '任務已添加', createid: newCreateid });
         });
     });
 });
+
 
 // 獲取用戶所有任務
 app.post('/api/tasks', (req, res) => {
