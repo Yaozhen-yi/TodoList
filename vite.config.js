@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
     ],
     // 根据当前环境设置 base 路径
     // base: mode === 'production' ? '/todoList/' : '/',
-    base: '/',
+    base: '/todoList/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
