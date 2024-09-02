@@ -9,7 +9,9 @@
     "serve": "vite preview --mode production",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "start": "node server.js"
+    "start": "node server.js",
+    "predeploy": "vite build",
+  "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
