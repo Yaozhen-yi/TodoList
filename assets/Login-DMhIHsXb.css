@@ -1,0 +1,1 @@
+.form{text-align:center;font-size:25px}label{margin:0 10%;font-weight:700;font-size:30px}input{margin:5% 0;text-align:center}.form span{color:red;display:block}button{margin:5%;font-size:25px}.form button:hover{font-size:35px;background-color:#d1c1f1}@media screen and (min-width: 768px){label{font-size:40px;width:50%}input{font-size:40px}button{font-size:50px}}
