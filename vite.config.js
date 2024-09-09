@@ -12,15 +12,13 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
     ],
-    // 根据当前环境设置 base 路径
-    // base: mode === 'production' ? '/todoList/' : '/',
     base: '/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
-    // 如果需要，还可以根据环境动态设置其他配置
+    // 根據動態環境設置其他配置
     server: {
       proxy: {
         '/api': {

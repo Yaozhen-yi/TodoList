@@ -5,33 +5,17 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-import helmet from 'helmet';
 
 dotenv.config({ path: '.env.production' });
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(
-    helmet.contentSecurityPolicy({
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com"], // 允许内联脚本和来自 gstatic 的脚本
-            styleSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com"], // 允许内联样式和来自 gstatic 的样式表
-            imgSrc: ["'self'", "data:", "https://www.gstatic.com"], // 允许来自 gstatic 的图片
-            connectSrc: ["'self'"],
-            fontSrc: ["'self'"],
-            objectSrc: ["'none'"],
-            frameSrc: ["'none'"],
-        },
-    })
-);
 
-
-// 允许来自特定来源的请求
+// 允許特定來源的請求
 const allowedOrigins = [
-    'http://localhost:5173',       // 开发环境
-    'https://todolist-s1pw.onrender.com' // 生产环境
+    'http://localhost:5173',       // 開發環境
+    'https://todolist-s1pw.onrender.com' // 生產環境
   ];
   
   app.use(cors({
@@ -75,10 +59,10 @@ app.post('/api/register', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 获取当前时间
+        // 取得當前時間
         const currentTime = new Date();
 
-        // 插入注册的用户数据，包括注册时间
+        // 插入註冊的用戶數據，包括註冊時間
         const sql = 'INSERT INTO user (name, password, email, logintime) VALUES (?, ?, ?, ?)';
 
         // 使用 Promise 封装 db.query，以便使用 await
@@ -130,13 +114,13 @@ app.post('/api/login', (req, res) => {
                             return res.status(500).send({ success: false, message: '服務器錯誤' });
                         }
                         
-                        // 成功登录并更新登录时间
+                        // 成功登入並更新用戶時間
                         res.send({
                             success: true,
                             message: '登录成功',
                             token: 'dummy-jwt-token',
                             userName: user.name,
-                            userId: user.id // 确保这里返回了 userId
+                            userId: user.id 
                         });
                     });
                 } else {
@@ -162,28 +146,24 @@ app.post('/api/create', (req, res) => {
         return res.status(400).json({ success: false, message: '用户ID缺失' });
     }
 
-    // 查询当前用户的最大 createid
-    const maxCreateIdSql = 'SELECT COALESCE(MAX(createid), 0) AS max_createid FROM tasks WHERE user_id = ?';
-    
-    db.query(maxCreateIdSql, [user_id], (maxCreateIdErr, maxCreateIdResult) => {
-        if (maxCreateIdErr) {
-            console.error('查询最大 createid 错误:', maxCreateIdErr);
-            return res.status(500).send({ success: false, message: '查询最大 createid 错误' });
+    const sql = 'INSERT INTO tasks (text, user_id) VALUES (?, ?)';
+    db.query(sql, [text, user_id], (err, result) => {
+        if (err) {
+            console.error('添加任務錯誤:', err);
+            return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
         }
 
-        const maxCreateid = maxCreateIdResult[0].max_createid;
-        const newCreateid = maxCreateid + 1;
-        console.log('新的 createid:', newCreateid); // 打印新的 createid
-
-        // 插入新任务
-        const insertSql = 'INSERT INTO tasks (createid, text, user_id) VALUES (?, ?, ?)';
-        db.query(insertSql, [newCreateid, text, user_id], (insertErr, insertResult) => {
-            if (insertErr) {
-                console.error('添加任務錯誤:', insertErr);
-                return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
+        // 查詢插入的數據來獲得createid
+        const selectSql = 'SELECT createid FROM tasks WHERE user_id = ? AND text = ? ORDER BY createid DESC LIMIT 1';
+        db.query(selectSql, [user_id, text], (selectErr, selectResult) => {
+            if (selectErr) {
+                console.error('查詢 createid 錯誤:', selectErr);
+                return res.status(500).send({ success: false, message: '查詢 createid 錯誤' });
             }
 
-            res.json({ success: true, message: '任務已添加', createid: newCreateid });
+            const createid = selectResult[0] ? selectResult[0].createid : null;
+            console.log('返回的 createid:', createid); // 印出返回的 createid
+            res.json({ success: true, message: '任務已添加', createid });
         });
     });
 });

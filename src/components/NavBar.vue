@@ -9,10 +9,10 @@ const showDialog = ref(false);
 
 
 const logout = () => {
-  authStore.logout(); // 调用 store 中的 logout 方法
-  router.push('/login'); // 注销后重定向到登录页面
-  showDialog.value = false; // 关闭对话框
-  alert('您已登出，请重新登录'); // 弹出提示框
+  authStore.logout(); // 調用 store 中的 logout 方法
+  router.push('/login'); // 註冊後重新導向登入畫面
+  showDialog.value = false; // 關閉彈跳視窗
+  alert('您已登出，請重新登入'); // 弹出提示框
 };
 
 const closeDialog = () => {

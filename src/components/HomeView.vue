@@ -34,7 +34,6 @@ const isVisible = (text) => {
             <button class="addbtn" @click="addTodo">新增</button>
         </div>
         <div v-if="!authStore.isLoggedIn">
-        <p v-show="isVisible(text)">請先<router-link to="/login"><b style="color: red;">登入</b></router-link>或<router-link to="/register"><b style="color: green;">註冊</b></router-link>才能使用</p>
     </div>
     </div>
 </template>
