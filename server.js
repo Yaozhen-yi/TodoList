@@ -1,24 +1,32 @@
 // server.js
 import express from 'express';
-import mysql from 'mysql2';
+import pg from 'pg';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.production' });
+
+// 在本地开发时加载 .env.development 文件
+if (process.env.NODE_ENV === 'development') {
+  dotenv.config({ path: '.env.development' });
+} else {
+  // 在生产环境时加载 .env.production 文件
+  dotenv.config({ path: '.env.production' });
+}
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-// 允許特定來源的請求
+// 允许特定来源的请求
 const allowedOrigins = [
-    'http://localhost:5173',       // 開發環境
-    'https://todolist-s1pw.onrender.com' // 生產環境
-  ];
-  
-  app.use(cors({
+    'http://localhost:5173',       // 开发环境
+    'https://todolist-s1pw.onrender.com' // 生产环境
+];
+
+app.use(cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -27,29 +35,35 @@ const allowedOrigins = [
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'] // 允许的头部字段
   }));
 
   app.use(express.json());
   app.use(express.static('dist'));
 app.use(bodyParser.json());
 
-// 數據庫連接
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+// 配置 PostgreSQL 连接
+const pool = new pg.Pool({
     user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
     database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+    ssl: {
+      rejectUnauthorized: false // 根据需要启用或禁用 SSL
+    }
   });
 
 
-db.connect((err) => {
+// 测试连接
+pool.connect((err, client, release) => {
     if (err) {
-      console.error('Database connection error:', err);
+      console.error('Database connection error:', err.stack);
       return;
     }
     console.log('Connected to the database');
+    release();
   });
 
 // 處理用戶註冊請求
@@ -63,23 +77,12 @@ app.post('/api/register', async (req, res) => {
         const currentTime = new Date();
 
         // 插入註冊的用戶數據，包括註冊時間
-        const sql = 'INSERT INTO user (name, password, email, logintime) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO "user" (name, password, email, logintime) VALUES ($1, $2, $3, $4) RETURNING id';
+        const values = [name, hashedPassword, email, currentTime];
 
-        // 使用 Promise 封装 db.query，以便使用 await
-        const query = (sql, params) => {
-            return new Promise((resolve, reject) => {
-                db.query(sql, params, (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-        };
         try {
-            const result = await query(sql, [name, hashedPassword, email, currentTime]);
-            res.json({ success: true, userId: result.insertId });
+            const result = await pool.query(sql, values);
+            res.json({ success: true, userId: result.rows[0].id });
         } catch (error) {
             console.error('Error inserting data:', error);
             res.status(500).json({ success: false, message: '服務器錯誤' });
@@ -90,106 +93,81 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// 處理用戶登錄請求
-app.post('/api/login', (req, res) => {
+// 处理用户登录请求
+app.post('/api/login', async (req, res) => {
     const { name, email, password } = req.body;
-
-    const query = 'SELECT * FROM user WHERE name = ? AND email = ?';
-    db.query(query, [name, email], async (err, results) => {
-        if (err) {
-            console.error('Error querying database:', err);
-            return res.status(500).send({ success: false, message: '服務器錯誤' });
-        }
-        if (results.length > 0) {
-            const user = results[0];
-            try {
-                const isMatch = await bcrypt.compare(password, user.password);
-                if (isMatch) {
-                    // 更新用戶時間
-                    const updateQuery = 'UPDATE user SET logintime = ? WHERE id = ?';
-                    const currentTime = new Date(); // 當前時間
-                    db.query(updateQuery, [currentTime, user.id], (updateErr) => {
-                        if (updateErr) {
-                            console.error('Error updating logintime:', updateErr);
-                            return res.status(500).send({ success: false, message: '服務器錯誤' });
-                        }
-                        
-                        // 成功登入並更新用戶時間
-                        res.send({
-                            success: true,
-                            message: '登录成功',
-                            token: 'dummy-jwt-token',
-                            userName: user.name,
-                            userId: user.id 
-                        });
-                    });
-                } else {
-                    res.status(401).send({ success: false, message: '密碼錯誤' });
-                }
-            } catch (bcryptError) {
-                console.error('Error comparing password:', bcryptError);
-                res.status(500).send({ success: false, message: '服務器錯誤' });
-            }
+  
+    const query = 'SELECT * FROM "user" WHERE name = $1 AND email = $2';
+    try {
+      const result = await pool.query(query, [name, email]);
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          // 更新用户时间
+          const updateQuery = 'UPDATE "user" SET logintime = $1 WHERE id = $2';
+          const currentTime = new Date(); // 当前时间
+          await pool.query(updateQuery, [currentTime, user.id]);
+  
+          // 成功登录并更新用户时间
+          res.send({
+            success: true,
+            message: '登录成功',
+            token: 'dummy-jwt-token',
+            userName: user.name,
+            userId: user.id
+          });
         } else {
-            res.status(401).send({ success: false, message: '用戶不存在' });
+          res.status(401).send({ success: false, message: '密码错误' });
         }
-    });
-});
-
-//處理代辦事項
-
-app.post('/api/create', (req, res) => {
+      } else {
+        res.status(401).send({ success: false, message: '用户不存在' });
+      }
+    } catch (error) {
+      console.error('Error querying database:', error);
+      res.status(500).send({ success: false, message: '服务端错误' });
+    }
+  });
+  
+  // 处理代办事项
+  app.post('/api/create', async (req, res) => {
     const { text, user_id } = req.body;
-    console.log('代辦事項:', req.body);
-
+    console.log('代办事项:', req.body);
+  
     if (!user_id) {
-        return res.status(400).json({ success: false, message: '用户ID缺失' });
+      return res.status(400).json({ success: false, message: '用户ID缺失' });
     }
-
-    const sql = 'INSERT INTO tasks (text, user_id) VALUES (?, ?)';
-    db.query(sql, [text, user_id], (err, result) => {
-        if (err) {
-            console.error('添加任務錯誤:', err);
-            return res.status(500).send({ success: false, message: '添加任務出現錯誤' });
-        }
-
-        // 查詢插入的數據來獲得createid
-        const selectSql = 'SELECT createid FROM tasks WHERE user_id = ? AND text = ? ORDER BY createid DESC LIMIT 1';
-        db.query(selectSql, [user_id, text], (selectErr, selectResult) => {
-            if (selectErr) {
-                console.error('查詢 createid 錯誤:', selectErr);
-                return res.status(500).send({ success: false, message: '查詢 createid 錯誤' });
-            }
-
-            const createid = selectResult[0] ? selectResult[0].createid : null;
-            console.log('返回的 createid:', createid); // 印出返回的 createid
-            res.json({ success: true, message: '任務已添加', createid });
-        });
-    });
-});
-
-
-// 獲取用戶所有任務
-app.post('/api/tasks', (req, res) => {
+  
+    const sql = 'INSERT INTO tasks (text, user_id) VALUES ($1, $2) RETURNING createid';
+    try {
+      const result = await pool.query(sql, [text, user_id]);
+      const createid = result.rows[0].createid;
+      console.log('返回的 createid:', createid); // 打印返回的 createid
+      res.json({ success: true, message: '任务已添加', createid });
+    } catch (error) {
+      console.error('添加任务错误:', error);
+      res.status(500).send({ success: false, message: '添加任务出现错误' });
+    }
+  });
+  
+  // 获取用户所有任务
+  app.post('/api/tasks', async (req, res) => {
     const { user_id } = req.body;
-
+  
     if (!user_id) {
-        return res.status(400).json({ success: false, message: '用户ID缺失' });
+      return res.status(400).json({ success: false, message: '用户ID缺失' });
     }
-
-    const sql = 'SELECT createid, text, status FROM tasks WHERE user_id = ?';
-    
-    db.query(sql, [user_id], (err, results) => {
-        if (err) {
-            console.error('獲取任務列表錯誤:', err);
-            return res.status(500).send({ success: false, message: '獲取任務列表出錯' });
-        }
-
-        res.json({ success: true, tasks: results });
-    });
-});
-
-
-app.listen(port, () => {
+  
+    const sql = 'SELECT createid, text, status FROM tasks WHERE user_id = $1';
+    try {
+      const result = await pool.query(sql, [user_id]);
+      res.json({ success: true, tasks: result.rows });
+    } catch (error) {
+      console.error('获取任务列表错误:', error);
+      res.status(500).send({ success: false, message: '获取任务列表出错' });
+    }
+  });
+  
+  app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
-});
+  });
