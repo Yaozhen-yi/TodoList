@@ -23,7 +23,7 @@ const port = process.env.PORT || 3000;
 // 允许特定来源的请求
 const allowedOrigins = [
     'http://localhost:5173',       // 开发环境
-    'https://todolist-s1pw.onrender.com' // 生产环境
+    'https://yao-todolist.zeabur.app' // 生产环境
 ];
 
 app.use(cors({
