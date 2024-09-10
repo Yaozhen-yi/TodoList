@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-
+dotenv.config();
 
 // 在本地开发时加载 .env.development 文件
 if (process.env.NODE_ENV === 'development') {
@@ -14,8 +14,6 @@ if (process.env.NODE_ENV === 'development') {
   // 在生产环境时加载 .env.production 文件
   dotenv.config({ path: '.env.production' });
 }
-
-
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -69,7 +67,7 @@ pool.connect((err, client, release) => {
 // 處理用戶註冊請求
 app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
-
+    console.log('Received registration request:', req.body);
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
