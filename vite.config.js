@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
-    // 根據動態環境設置其他配置
+    // 根據動態環境設置其他配置如果需要，还可以根据环境动态设置其他配置
     server: {
       proxy: {
         '/api': {
