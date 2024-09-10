@@ -40,16 +40,19 @@ const onRegister = async () => {
             email: email.value,
         });
 
+        console.log('Registration response:', response);
+        
         if (response.data.success) {
             console.log('id:', response.data.userId); // 印出用戶id
             alert('註冊成功！');
             isAuthenticated.value = true; // 禁用註冊按鈕
             router.push('/login'); // 跳轉到登入頁面
         } else {
-            alert('註冊失敗，請重試。');
+            alert('注册失败，可能是因为服务器返回了错误。');
         }
     } catch (error) {
-        alert('註冊過程出現錯誤，請重試。');
+        console.error('Registration error:', error);
+        alert('注册过程出现错误，请检查控制台获取更多信息。');
     }
 };
 </script>
