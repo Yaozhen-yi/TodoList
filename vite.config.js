@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
     ],
-    base: '/',
+    base: '/todolist/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -20,13 +20,13 @@ export default defineConfig(({ mode }) => {
     },
     // 根據動態環境設置其他配置如果需要，还可以根据环境动态设置其他配置
     server: {
-      proxy: {
+      proxy: mode === 'development' ? {
         '/api': {
           target: env.VITE_APP_API_BASE_URL,
           changeOrigin: true,
           secure: false,
         }
-      }
-    }
-  }
+      } : undefined // 生产环境不需要代理
+  },
+};
 })
