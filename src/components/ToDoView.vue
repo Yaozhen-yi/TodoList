@@ -120,11 +120,12 @@ const filteredTasks = computed(() => {
     font-size: 25px;
 }
 .text{
-    margin: 0 5%;
     text-align: center;
+    margin-right: 2%;
 }
 
 .ad{
+    margin-left: 2%;
     font-weight: 700;
 }
 .button-group{
@@ -140,7 +141,8 @@ const filteredTasks = computed(() => {
     background-color: #d4dbd4;
 }
 .input-group p span{
-    margin: 0 4%;
+    margin-left: 2%;
+    margin-right:4%;
     font-size: 25px;
     font-weight: 700;
 }
@@ -154,7 +156,7 @@ const filteredTasks = computed(() => {
     margin: 3%;
 }
 .input-group .detail span{
-    margin:  0 9%;
+    margin: 0 5% 0 9%;
     font-size: 20px;
 }
 .input-group li{
@@ -177,18 +179,21 @@ const filteredTasks = computed(() => {
 }
 .button-group button{
     margin: 5% auto;
-    font-size: 25px;
+    font-size: 28px;
 }
 .input-group p span{
-    font-size: 40px;
-    margin: 0 5%;
+    font-size: 30px;
+    margin: 0 7%;
 }
 .input-group  .detail span{
     font-size: 40px;
     margin: 0 auto;
 }
 }@media screen and (min-width: 1024px) {
-    .input-group p span{
+    .button-group button{
+    font-size: 35px;
+}
+.input-group p span{
     font-size: 40px;
     margin: 0 8%;
 }
