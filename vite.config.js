@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     },
     // 根據動態環境設置其他配置如果需要，还可以根据环境动态设置其他配置
     server: {
-      proxy: mode === 'development' ? {
+      proxy: mode === 'production' ? {
         '/api': {
           target: env.VITE_APP_API_BASE_URL , // 确保代理指向正确的目标
           changeOrigin: true,
