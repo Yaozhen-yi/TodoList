@@ -38,8 +38,18 @@ app.use(cors({
   }));
 
   app.use(express.json());
-  app.use(express.static('dist'));
 app.use(bodyParser.json());
+// 处理 API 路由
+app.use('/api', router);
+
+// 处理静态文件
+app.use(express.static('dist'));
+
+// 处理所有其他未匹配的路由（一般返回前端的 index.html）
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+});
+
 
 // 配置 PostgreSQL 连接
 const pool = new pg.Pool({
