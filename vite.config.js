@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
     ],
-    base: '/todolist/',
+    base: '/',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
