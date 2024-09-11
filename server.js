@@ -5,7 +5,6 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-dotenv.config();
 
 // 在本地开发时加载 .env.development 文件
 if (process.env.NODE_ENV === 'development') {
@@ -48,6 +47,7 @@ const pool = new pg.Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
       rejectUnauthorized: false // 根据需要启用或禁用 SSL
     }

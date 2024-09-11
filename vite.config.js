@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: mode === 'development' ? {
         '/api': {
-          target: env.VITE_APP_API_BASE_URL || 'http://localhost:3000', // 确保代理指向正确的目标
+          target: env.VITE_APP_API_BASE_URL , // 确保代理指向正确的目标
           changeOrigin: true,
           secure: false,
         }
